@@ -1,56 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Filmes Recém Lançados</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
 
-<body>
-
-
+  <body>
     <section id="Filmes">
-
-        <h1 class="display-4 text-center mt-3">Filmes</h1>
-
-        <div class="container-fluid">
-            <div class="overflow-x-auto">
-                <div class="d-flex gap-3" id="main">
-                    <!--Cards Gerados Dinamicamente aqui-->
-                </div>
-            </div>
+    
+        <div class="container-fluid w-50">
+            <h1 class="display-4 text-center mt-3">Movie Center v2</h1>
+            <div class="input-group mb-3 mt-4">
+                <input type="text" class="form-control" id="pesquisa" placeholder="Pesquise Aqui" aria-label="Recipient's username" aria-describedby="button-addon2">
+                <button class="btn btn-outline-secondary" type="button" onclick="pesquisa()" id="button-addon2">Pesquisar</button>
+              </div>
+              
         </div>
-
+        <h1 class="display-4 text-center mt-3">Filmes</h1>
+      <div class="container-fluid">
+        <div class="">
+          <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center align-items-center" id="main">
+            <!--Cards Gerados Dinamicamente aqui-->
+          </div>
+        </div>
+      </div>
     </section>
+
+
+    <section id="Series">
+        <h1 class="display-4 text-center mt-3">Series</h1>
+      
+        <div class="container-fluid">
+          <div class="">
+            <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center align-items-center" id="main2">
+              <!--Cards Gerados Dinamicamente aqui-->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="Animes">
+        <h1 class="display-4 text-center mt-3">Animes</h1>
+      
+        <div class="container-fluid">
+          <div class="">
+            <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center align-items-center" id="main3">
+              <!--Cards Gerados Dinamicamente aqui-->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <script>
+
+        function pesquisa(){
+
+          
+            var texto = document.getElementById('pesquisa').value 
+
+            window.location.href = `/serch/?texto=${texto}`;
+
+
+        }
+        const apiKey3 = "edc2129acf3286e5cf497714f2648b19";
+        
+        const language3 = 'pt-BR'; // O idioma desejado
+        
+        const country3 = 'JP'; // Código do país para o Japão
+        const genreId = 16; // ID do gênero para animação (animes)
+
+                const seriesUrl3 = `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey3}&language=${language3}&with_origin_country=${country3}&with_genres=${genreId}`;;
+          
+                $.ajax({
+                  url: seriesUrl3,
+                  method: "GET",
+                  success: function (data) {
+                    console.log(data.results);
+                    for (let index = 0; index < data.results.length; index++) {
+                      if (data.results.length > 0) {
+                        const dataLancamento = new Date(data.results[index].release_date); // Converta a string para um objeto Date
+          
+                        const dataLimite = new Date("2023-12-31"); // Crie um objeto Date para '2023-12-31'
+          
+                       
+                          
+                          const seriesId = data.results[index].id;
+          
+                          const seriesDetailsUrl = `https://api.themoviedb.org/3/tv/${seriesId}?api_key=${apiKey}&language=pt-BR&append_to_response=external_ids&media_type`;
+          
+                          $.ajax({
+                            url: seriesDetailsUrl,
+                            method: "GET",
+                            success: function (details) {
+                              console.log(details);
+                              var type = null;
+                              if (details.first_air_date != null) {
+                                type = "serie";
+                              } else if (details.release_date != null) {
+                                type = "filme";
+                              }
+          
+                              if (
+                                details.first_air_date == null ||
+                                details.first_air_date == undefined ||
+                                details.first_air_date == "" ||
+                                details.first_air_date == " "
+                              ) {
+                                details.first_air_date = details.release_date;
+                              }
+                              if (
+                                details.name == null ||
+                                details.name == undefined ||
+                                details.name == "" ||
+                                details.name == " "
+                              ) {
+                                details.name = details.title;
+                              }
+                              var col = `
+                                      
+                                              <div class="col d-flex justify-content-center align-items-center" >
+                                          <div  class="card text-bg-dark text-center" style="width: 18rem;" style="cursor: pointer;">
+                                              <img
+                                                  src="https://image.tmdb.org/t/p/w500${details.poster_path}"
+                                                  class="card-img"
+                                                  alt="${details.name}"
+                                                  onerror="this.src='https://hoshizaki-sea.com/wp-content/uploads/2023/05/image-not-available-500x750.jpg'">
+          
+                                              <a href='/player/?link=https://embed.warezcdn.com/${type}/${details.external_ids.imdb_id}' class="card-img-overlay d-flex flex-column justify-content-end text-white">
+                                                  <div class='bg-dark opacity-100'>
+                                                      <h5 class=""><strong style='color: white;'>${details.name}</strong style='color: white;'></h5>
+                                              <div class='d-flex gap-2 justify-content-center align-items-center text-nowrap'>
+                                                  <div class="card-text"><strong style='color: white;'>${details.first_air_date}</strong style='color: white;'></div> <div class="card-text"><strong style='color: white;'>${details.popularity}</strong style='color: white;'></div> <div class="card-text"><strong style='color: white;'>${details.status}</strong style='color: blue;'></div>
+                                              </div>
+                                                  </div>
+                                            
+                                  
+                                              </a>
+                                          </div>
+                                          </div>
+                                              
+                                              `;
+                              document.getElementById("main3").innerHTML += col;
+                            },
+                            error: function (error) {
+                              console.log(
+                                "Erro na solicitação para obter informações adicionais:",
+                                error
+                              );
+                            },
+                          });
+                        
+                      } else {
+                        console.log("Série de TV não encontrada.");
+                      }
+                    }
+                  },
+                  error: function (error) {
+                    console.log("Erro na solicitação:", error);
+                  },
+                });
+              </script>
+
+
+      <script>
+
+const apiKey2 = "edc2129acf3286e5cf497714f2648b19";
+
+const language2 = 'pt-BR'; // O idioma desejado
+
+const country = 'US'; // Código do país para os Estados Unidos
+
+        const seriesUrl2 = `https://api.themoviedb.org/3/tv/popular?api_key=${apiKey2}&language=${language2}&with_origin_country=${country}`;;
+  
+        $.ajax({
+          url: seriesUrl2,
+          method: "GET",
+          success: function (data) {
+            console.log(data.results);
+            for (let index = 0; index < data.results.length; index++) {
+              if (data.results.length > 0) {
+                const dataLancamento = new Date(data.results[index].release_date); // Converta a string para um objeto Date
+  
+                const dataLimite = new Date("2023-12-31"); // Crie um objeto Date para '2023-12-31'
+  
+               
+                  
+                  const seriesId = data.results[index].id;
+  
+                  const seriesDetailsUrl = `https://api.themoviedb.org/3/tv/${seriesId}?api_key=${apiKey}&language=pt-BR&append_to_response=external_ids&media_type`;
+  
+                  $.ajax({
+                    url: seriesDetailsUrl,
+                    method: "GET",
+                    success: function (details) {
+                      console.log(details);
+                      var type = null;
+                      if (details.first_air_date != null) {
+                        type = "serie";
+                      } else if (details.release_date != null) {
+                        type = "filme";
+                      }
+  
+                      if (
+                        details.first_air_date == null ||
+                        details.first_air_date == undefined ||
+                        details.first_air_date == "" ||
+                        details.first_air_date == " "
+                      ) {
+                        details.first_air_date = details.release_date;
+                      }
+                      if (
+                        details.name == null ||
+                        details.name == undefined ||
+                        details.name == "" ||
+                        details.name == " "
+                      ) {
+                        details.name = details.title;
+                      }
+                      var col = `
+                              
+                                      <div class="col d-flex justify-content-center align-items-center" >
+                                  <div  class="card text-bg-dark text-center" style="width: 18rem;" style="cursor: pointer;">
+                                      <img
+                                          src="https://image.tmdb.org/t/p/w500${details.poster_path}"
+                                          class="card-img"
+                                          alt="${details.name}"
+                                          onerror="this.src='https://hoshizaki-sea.com/wp-content/uploads/2023/05/image-not-available-500x750.jpg'">
+  
+                                      <a href='/player/?link=https://embed.warezcdn.com/${type}/${details.external_ids.imdb_id}' class="card-img-overlay d-flex flex-column justify-content-end text-white">
+                                          <div class='bg-dark opacity-100'>
+                                              <h5 class=""><strong style='color: white;'>${details.name}</strong style='color: white;'></h5>
+                                      <div class='d-flex gap-2 justify-content-center align-items-center text-nowrap'>
+                                          <div class="card-text"><strong style='color: white;'>${details.first_air_date}</strong style='color: white;'></div> <div class="card-text"><strong style='color: white;'>${details.popularity}</strong style='color: white;'></div> <div class="card-text"><strong style='color: white;'>${details.status}</strong style='color: blue;'></div>
+                                      </div>
+                                          </div>
+                                    
+                          
+                                      </a>
+                                  </div>
+                                  </div>
+                                      
+                                      `;
+                      document.getElementById("main2").innerHTML += col;
+                    },
+                    error: function (error) {
+                      console.log(
+                        "Erro na solicitação para obter informações adicionais:",
+                        error
+                      );
+                    },
+                  });
+                
+              } else {
+                console.log("Série de TV não encontrada.");
+              }
+            }
+          },
+          error: function (error) {
+            console.log("Erro na solicitação:", error);
+          },
+        });
+      </script>
 
 
 
     <script>
-        const apiKey = 'edc2129acf3286e5cf497714f2648b19';
+      const apiKey = "edc2129acf3286e5cf497714f2648b19";
 
-        const seriesUrl = `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&language=pt-BR&query=Dragon Ball`;
+      const language = 'pt-BR'; // O idioma desejado
 
-        $.ajax({
-            url: seriesUrl,
-            method: 'GET',
-            success: function (data) {
-                for (let index = 0; index < data.results.length; index++) {
-                    if (data.results.length > 0) {
+// Construa a URL da API para obter os filmes em lançamento
 
-                        const seriesId = data.results[index].id;
+const country2 = 'US'; // Código do país para os Estados Unidos
 
-                        const seriesDetailsUrl = `https://api.themoviedb.org/3/tv/${seriesId}?api_key=${apiKey}&language=pt-BR&append_to_response=external_ids`;
+      const seriesUrl = `https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=${language}&with_origin_country=${country2}`;
 
-                        $.ajax({
-                            url: seriesDetailsUrl,
-                            method: 'GET',
-                            success: function (details) {
-                                console.log(details)
-                                var col = `
+      $.ajax({
+        url: seriesUrl,
+        method: "GET",
+        success: function (data) {
+        
+          for (let index = 0; index < data.results.length; index++) {
+            if (data.results.length > 0) {
+              const dataLancamento = new Date(data.results[index].release_date); // Converta a string para um objeto Date
+
+              const dataLimite = new Date("2023-12-31"); // Crie um objeto Date para '2023-12-31'
+
+             
+                
+                const seriesId = data.results[index].id;
+
+                const seriesDetailsUrl = `https://api.themoviedb.org/3/movie/${seriesId}?api_key=${apiKey}&language=pt-BR&append_to_response=external_ids&media_type`;
+
+                $.ajax({
+                  url: seriesDetailsUrl,
+                  method: "GET",
+                  success: function (details) {
+          
+                    var type = null;
+                    if (details.first_air_date != null) {
+                      type = "serie";
+                    } else if (details.release_date != null) {
+                      type = "filme";
+                    }
+
+                    if (
+                      details.first_air_date == null ||
+                      details.first_air_date == undefined ||
+                      details.first_air_date == "" ||
+                      details.first_air_date == " "
+                    ) {
+                      details.first_air_date = details.release_date;
+                    }
+                    if (
+                      details.name == null ||
+                      details.name == undefined ||
+                      details.name == "" ||
+                      details.name == " "
+                    ) {
+                      details.name = details.title;
+                    }
+                    var col = `
                             
                                     <div class="col d-flex justify-content-center align-items-center" >
                                 <div  class="card text-bg-dark text-center" style="width: 18rem;" style="cursor: pointer;">
@@ -60,7 +338,7 @@
                                         alt="${details.name}"
                                         onerror="this.src='https://hoshizaki-sea.com/wp-content/uploads/2023/05/image-not-available-500x750.jpg'">
 
-                                    <a href='' class="card-img-overlay d-flex flex-column justify-content-end text-white">
+                                    <a href='/player/?link=https://embed.warezcdn.com/${type}/${details.external_ids.imdb_id}' class="card-img-overlay d-flex flex-column justify-content-end text-white">
                                         <div class='bg-dark opacity-100'>
                                             <h5 class=""><strong style='color: white;'>${details.name}</strong style='color: white;'></h5>
                                     <div class='d-flex gap-2 justify-content-center align-items-center text-nowrap'>
@@ -73,27 +351,29 @@
                                 </div>
                                 </div>
                                     
-                                    `
-                                document.getElementById('main').innerHTML += col
-
-                            },
-                            error: function (error) {
-                                console.log("Erro na solicitação para obter informações adicionais:", error);
-                            }
-                        });
-
-                    } else {
-                        console.log("Série de TV não encontrada.");
-                    }
-
-                }
-            },
-            error: function (error) {
-                console.log("Erro na solicitação:", error);
+                                    `;
+                    document.getElementById("main").innerHTML += col;
+                  },
+                  error: function (error) {
+                    console.log(
+                      "Erro na solicitação para obter informações adicionais:",
+                      error
+                    );
+                  },
+                });
+              
+            } else {
+              console.log("Série de TV não encontrada.");
             }
-        });
-
+          }
+        },
+        error: function (error) {
+          console.log("Erro na solicitação:", error);
+        },
+      });
     </script>
-</body>
 
+
+
+  </body>
 </html>
